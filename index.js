@@ -35,12 +35,25 @@ bot.onText(/напомни (.+) в (.+)/i, function (msg, match) {
     bot.sendMessage(userId, 'Отлично! Я обязательно напомню, если не сдохну :)');
 });
 
-bot.onText(/отчет/i, function (msg) {
-    //console.log(os.platform());
+bot.onText(/test/i, function (msg) {
+  //  console.log(+;
+    console.log(os.cpus());
+    var replmsg;
+    replmsg="PC "+ os.hostname() + ' ' + os.platform() + " " + os.arch();
+    replmsg=replmsg+"\n"+"CPU "+os.cpus()[1].model+" Cores: "+os.cpus().length;
+    replmsg=replmsg+"\n"+"RAM "+ Math.round(os.totalmem()/1048576)/1000 +" GB/ "+ Math.round(os.freemem()/1048576)/1000 +" GB";
+    bot.sendMessage(msg.chat.id,replmsg);
+});
+
+bot.onText(/report/i, function (msg) {
+    var replmsg;
+    replmsg="PC "+ os.hostname() + ' ' + os.platform() + " " + os.arch();
+    replmsg=replmsg+"\n"+"CPU "+os.cpus()[1].model+" Cores: "+os.cpus().length;
+    replmsg=replmsg+"\n"+"RAM "+ Math.round(os.totalmem()/1048576)/1000 +" GB/ "+ Math.round(os.freemem()/1048576)/1000 +" GB";
     db.forEach(function(key, val) {
-        console.log('Found key: %s, val: %j', key, val);
-        console.log(val.id);
-        bot.sendMessage(val.id, os.platform());
+      //  console.log('Found key: %s, val: %j', key, val);
+      //  console.log(val.id);
+        bot.sendMessage(val.id, replmsg);
     });
 });
 
