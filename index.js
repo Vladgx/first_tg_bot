@@ -12,6 +12,8 @@ const bot = new Tb(token,{polling:true});
 var dirty = require('dirty');
 var db = dirty('user.db');
 var os = require('os');
+var ds = require('fd-diskspace');
+const si = require('systeminformation');
 
 bot.onText(/\/start/, (msg) => {
 
@@ -24,6 +26,25 @@ bot.onText(/\/start/, (msg) => {
 
 });
 
+function sms(chatid,drvinf){
+    var replmsg;
+    replmsg="PC "+ os.hostname() + ' ' + os.platform() + " " + os.arch();
+    replmsg=replmsg+"\n"+"CPU "+os.cpus()[1].model+" Cores: "+os.cpus().length;
+    replmsg=replmsg+"\n"+"RAM "+ Math.round(os.totalmem()/1048576)/1000 +" GB/ "+ Math.round(os.freemem()/1048576)/1000 +" GB";
+    replmsg=replmsg+"\n"+drvinf;
+    bot.sendMessage(chatid,replmsg);
+}
+
+  function makeBuffer() {
+    var text = '';
+
+    return function(piece) {
+        if (arguments.length == 0) { // вызов без аргументов
+            return text;
+        }
+        text += piece;
+    };
+  }
 var notes = [];
 bot.onText(/напомни (.+) в (.+)/i, function (msg, match) {
     var userId = msg.from.id;
@@ -36,25 +57,41 @@ bot.onText(/напомни (.+) в (.+)/i, function (msg, match) {
 });
 
 bot.onText(/test/i, function (msg) {
-  //  console.log(+;
-    console.log(os.cpus());
-    var replmsg;
+    var diskdata="HDD ";
+     si.fsSize()
+        .then(data =>{
+             data.forEach(function(v){
+                 console.log(v);
+                 if (!(v.type ===undefined)){diskdata=diskdata+v.fs+" "+v.type+" "+Math.round(v.size/1048576)/1000 +" GB/ "+ Math.round(v.used/1048576)/1000 +" GB "+
+                     Math.round(v.use)+" %, "
+                 }
+             });
+             sms(msg.chat.id,diskdata);
+         } )
+        .catch(error => console.error(error));
+        // var statsSync = ds.diskSpaceSync();
+        //console.log(statsSync);
+
+  /*  var replmsg;
     replmsg="PC "+ os.hostname() + ' ' + os.platform() + " " + os.arch();
     replmsg=replmsg+"\n"+"CPU "+os.cpus()[1].model+" Cores: "+os.cpus().length;
     replmsg=replmsg+"\n"+"RAM "+ Math.round(os.totalmem()/1048576)/1000 +" GB/ "+ Math.round(os.freemem()/1048576)/1000 +" GB";
-    bot.sendMessage(msg.chat.id,replmsg);
+    bot.sendMessage(msg.chat.id,replmsg);*/
 });
 
 bot.onText(/report/i, function (msg) {
-    var replmsg;
-    replmsg="PC "+ os.hostname() + ' ' + os.platform() + " " + os.arch();
-    replmsg=replmsg+"\n"+"CPU "+os.cpus()[1].model+" Cores: "+os.cpus().length;
-    replmsg=replmsg+"\n"+"RAM "+ Math.round(os.totalmem()/1048576)/1000 +" GB/ "+ Math.round(os.freemem()/1048576)/1000 +" GB";
-    db.forEach(function(key, val) {
-      //  console.log('Found key: %s, val: %j', key, val);
-      //  console.log(val.id);
-        bot.sendMessage(val.id, replmsg);
-    });
+    var diskdata="HDD ";
+    si.fsSize()
+        .then(data =>{
+            data.forEach(function(v){
+                console.log(v);
+                if (!(v.type ===undefined)){diskdata=diskdata+v.fs+" "+v.type+" "+Math.round(v.size/1048576)/1000 +" GB/ "+ Math.round(v.used/1048576)/1000 +" GB "+
+                    Math.round(v.use)+" %, "
+                }
+            });
+            sms(msg.chat.id,diskdata);
+        } )
+        .catch(error => console.error(error));
 });
 
 setInterval(function(){
